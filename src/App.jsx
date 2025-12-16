@@ -122,27 +122,31 @@ export default function PaletteConverter() {
     if (!image) return;
 
     setProcessing(true);
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    
+    // Use setTimeout to allow the UI to update and show the loading state
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
 
-    canvas.width = image.width;
-    canvas.height = image.height;
+      canvas.width = image.width;
+      canvas.height = image.height;
 
-    ctx.drawImage(image, 0, 0);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
+      ctx.drawImage(image, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
 
-    for (let i = 0; i < data.length; i += 4) {
-      const pixel = [data[i], data[i + 1], data[i + 2]];
-      const nearest = findNearestColor(pixel);
-      data[i] = nearest.r;
-      data[i + 1] = nearest.g;
-      data[i + 2] = nearest.b;
-    }
+      for (let i = 0; i < data.length; i += 4) {
+        const pixel = [data[i], data[i + 1], data[i + 2]];
+        const nearest = findNearestColor(pixel);
+        data[i] = nearest.r;
+        data[i + 1] = nearest.g;
+        data[i + 2] = nearest.b;
+      }
 
-    ctx.putImageData(imageData, 0, 0);
-    setConvertedImage(canvas.toDataURL());
-    setProcessing(false);
+      ctx.putImageData(imageData, 0, 0);
+      setConvertedImage(canvas.toDataURL());
+      setProcessing(false);
+    }, 100);
   };
 
   const downloadImage = () => {
@@ -155,6 +159,22 @@ export default function PaletteConverter() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-8">
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+          animation: shimmer 1.5s infinite;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-out;
+        }
+      `}</style>
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">Image Palette Converter</h1>
         <p className="text-gray-600 mb-8">Convert any image to use only your custom color palette</p>
@@ -253,9 +273,22 @@ export default function PaletteConverter() {
                   <button
                     onClick={convertImage}
                     disabled={processing}
-                    className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 font-semibold"
+                    className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 font-semibold transition-all relative overflow-hidden"
                   >
-                    {processing ? 'Processing...' : 'Convert Image'}
+                    {processing && (
+                      <span className="absolute inset-0 bg-green-600">
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-shimmer"></span>
+                      </span>
+                    )}
+                    <span className="relative flex items-center justify-center gap-2">
+                      {processing && (
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      )}
+                      {processing ? 'Processing...' : 'Convert Image'}
+                    </span>
                   </button>
                 </div>
               )}
@@ -272,12 +305,12 @@ export default function PaletteConverter() {
             )}
 
             {convertedImage && (
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-lg shadow-lg p-6 animate-fade-in">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Converted Image</h2>
                   <button
                     onClick={downloadImage}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2 transition-all hover:scale-105"
                   >
                     <Download size={20} /> Download
                   </button>
