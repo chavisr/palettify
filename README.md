@@ -63,11 +63,3 @@ npm run dev
 ## 📝 License
 
 MIT License - feel free to use this project however you'd like!
-
-## 🤝 Contributing
-
-Issues and pull requests are welcome!
-
----
-
-Made with ❤️ by [chavisr](https://github.com/chavisr)
