@@ -2,6 +2,10 @@ import React, { useState, useRef } from 'react';
 import { Upload, Plus, X, Download } from 'lucide-react';
 
 const PRESET_PALETTES = {
+  'gruvbox': {
+    name: 'Gruvbox',
+    colors: ['#282828', '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#a89984', '#928374', '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#ebdbb2']
+  },
   'gruvbox-material': {
     name: 'Gruvbox Material',
     colors: ['#282828', '#3c3836', '#504945', '#665c54', '#7c6f64', '#928374', '#a89984', '#d4be98', '#ddc7a1', '#d8a657', '#e78a4e', '#ea6962', '#a9b665', '#89b482', '#7daea3', '#d3869b']
@@ -37,8 +41,8 @@ const PRESET_PALETTES = {
 };
 
 export default function PaletteConverter() {
-  const [selectedPreset, setSelectedPreset] = useState('gruvbox-material');
-  const [palette, setPalette] = useState(PRESET_PALETTES['gruvbox-material'].colors);
+  const [selectedPreset, setSelectedPreset] = useState('gruvbox');
+  const [palette, setPalette] = useState(PRESET_PALETTES['gruvbox'].colors);
   const [customMode, setCustomMode] = useState(false);
   const [newColor, setNewColor] = useState('#000000');
   const [image, setImage] = useState(null);
