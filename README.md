@@ -59,6 +59,7 @@ npm run dev
 - React + Vite
 - Tailwind CSS
 - Canvas API for image processing
+- AI - 100% vibe coding
 
 ## 📝 License
 
