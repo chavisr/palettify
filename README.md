@@ -7,8 +7,6 @@ Convert any image to use only colors from your custom palette or choose from bea
 
 [**✨ Try it now →**](https://chavisr.github.io/palettify)
 
-![Palettify Demo](preview.gif)
-
 ## ✨ Features
 
 - 🎨 **9 Preset Palettes** - Gruvbox, Nord, Dracula, Tokyo Night, and more
