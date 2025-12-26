@@ -40,6 +40,7 @@ Convert any image to use only colors from your custom palette or choose from bea
 | Monokai | Classic Sublime Text colors |
 
 ## 🛠️ Local Development
+
 ```bash
 # Clone the repo
 git clone https://github.com/chavisr/palettify.git
@@ -50,14 +51,55 @@ npm install
 
 # Run dev server
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run linter
+npm run lint
+
+# Deploy to GitHub Pages
+npm run deploy
 ```
+
+## 🔧 How It Works
+
+Palettify uses a modular React architecture with client-side image processing:
+
+1. **Image Upload** - Uses FileReader API to load images without server upload
+2. **Color Matching** - Euclidean distance algorithm finds nearest palette color for each pixel
+3. **Canvas Processing** - HTML5 Canvas API manipulates pixels directly in browser
+4. **Export** - Converted image saved as PNG data URL for instant download
+
+### Architecture
+
+```
+src/
+├── components/          # Modular UI components
+│   ├── PaletteSelector.jsx
+│   ├── PaletteGrid.jsx
+│   ├── ImageUploader.jsx
+│   └── ImageDisplay.jsx
+├── utils/               # Pure functions
+│   ├── colorUtils.js
+│   └── imageProcessing.js
+└── constants/
+    └── palettes.js      # Preset configurations
+```
+
+All state management happens in `App.jsx` with props flowing down to components.
 
 ## 🏗️ Built With
 
-- React + Vite
-- Tailwind CSS
-- Canvas API for image processing
-- AI
+- **React 19** - UI framework
+- **Vite 7** - Build tool with Fast Refresh
+- **Tailwind CSS 3** - Utility-first styling
+- **Canvas API** - Client-side image processing
+- **Lucide React** - Icon library
+- **GitHub Pages** - Hosting
 
 ## 📝 License
 
