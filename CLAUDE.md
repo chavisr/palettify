@@ -27,33 +27,53 @@ npm run deploy
 
 ## Architecture
 
-### Core Components
+The codebase follows a modular architecture with clear separation of concerns:
 
-The application is built as a single React component (`src/App.jsx`) that handles:
+```
+src/
+├── components/          # UI Components
+│   ├── PaletteSelector.jsx    # Preset palette dropdown
+│   ├── PaletteGrid.jsx        # Color grid with add/remove
+│   ├── ImageUploader.jsx      # File upload and convert button
+│   └── ImageDisplay.jsx       # Original & converted image display
+├── utils/               # Pure functions
+│   ├── colorUtils.js          # hexToRgb, colorDistance, findNearestColor
+│   └── imageProcessing.js     # convertImageToPalette, loadImageFromFile
+├── constants/
+│   └── palettes.js            # PRESET_PALETTES configuration
+├── App.jsx              # Main orchestrator component
+└── main.jsx             # React entry point
+```
 
-1. **Palette Management**: 9 preset color palettes (Gruvbox, Nord, Dracula, Tokyo Night, Solarized, Catppuccin Mocha, One Dark, Monokai, Gruvbox Material) stored in the `PRESET_PALETTES` object
-2. **Image Processing**: Client-side pixel manipulation using Canvas API
-3. **Color Matching**: Euclidean distance algorithm in RGB color space to find nearest palette color
+### Core Functionality
+
+1. **Palette Management**: 9 preset color palettes (Gruvbox, Nord, Dracula, Tokyo Night, Solarized, Catppuccin Mocha, One Dark, Monokai, Gruvbox Material) defined in `src/constants/palettes.js`
+2. **Image Processing**: Client-side pixel manipulation using Canvas API (see `src/utils/imageProcessing.js`)
+3. **Color Matching**: Euclidean distance algorithm in RGB color space (`src/utils/colorUtils.js:findNearestColor`)
 
 ### Image Conversion Flow
 
-1. User uploads image → FileReader converts to data URL → Image object created
-2. Image drawn to hidden canvas → `getImageData()` extracts pixel array
-3. Each pixel converted using `findNearestColor()` which:
-   - Calculates Euclidean distance in RGB space (`colorDistance()`)
-   - Finds closest match from selected palette
-   - Replaces pixel with matched color
-4. Modified pixel data written back to canvas → exported as PNG
+1. User uploads image → `loadImageFromFile()` (imageProcessing.js:38) converts file to Image element via FileReader
+2. User clicks Convert → `convertImageToPalette()` (imageProcessing.js:13) processes image:
+   - Image drawn to hidden canvas → `getImageData()` extracts pixel array
+   - Each pixel converted using `findNearestColor()` (colorUtils.js:30)
+   - Calculates Euclidean distance in RGB space via `colorDistance()` (colorUtils.js:18)
+   - Replaces pixel with matched color from palette
+   - Modified pixel data written back to canvas
+3. Result exported as PNG data URL → displayed in ImageDisplay component
+4. User downloads via `downloadImage()` (imageProcessing.js:61)
 
 ### State Management
 
-All state managed via React useState hooks:
+All state lives in App.jsx and flows down to components via props:
 - `palette`: Current color palette (array of hex strings)
 - `selectedPreset`: Active preset key
 - `customMode`: Boolean flag when user modifies palette
 - `image`: Original uploaded image object
 - `convertedImage`: Data URL of processed image
 - `processing`: Loading state during conversion
+
+Event handlers in App.jsx (`handlePresetChange`, `handleAddColor`, `handleRemoveColor`, `handleImageUpload`, `handleConvert`, `handleDownload`) coordinate state updates across components.
 
 ### Build Configuration
 
@@ -66,28 +86,37 @@ All state managed via React useState hooks:
 
 ### Color Conversion Algorithm
 
-The `findNearestColor()` function (App.jsx:92-107) implements a brute-force nearest neighbor search:
-- Input: RGB pixel as `[r, g, b]` array
-- Process: Calculates distance to every palette color
+The `findNearestColor()` function (colorUtils.js:30-47) implements a brute-force nearest neighbor search:
+- Input: RGB pixel as `[r, g, b]` array, palette as array of hex strings
+- Process: Calculates Euclidean distance to every palette color using `colorDistance()`
 - Output: Returns RGB object of nearest color
 
-Performance note: Conversion happens synchronously with a 100ms `setTimeout` to allow UI updates before blocking.
+Performance note: Conversion uses Promise with 100ms `setTimeout` to allow UI updates before blocking operations (imageProcessing.js:15).
+
+### Component Architecture
+
+- **Separation of Concerns**: UI components (components/), business logic (utils/), configuration (constants/)
+- **Props Down, Events Up**: App.jsx manages all state, components receive props and emit events via callbacks
+- **Pure Functions**: All utilities in `utils/` are pure functions with no side effects
+- **Reusability**: Each component handles a single responsibility and can be tested/modified independently
 
 ### Palette Modification
 
-Users can add/remove colors from presets, which sets `customMode: true`. Custom palettes are lost on preset change - there's no persistence layer.
+Users can add/remove colors from presets via PaletteGrid, which triggers `customMode: true` in App.jsx. Custom palettes are lost on preset change - there's no persistence layer.
 
 ### Image Upload
 
-File input is hidden (App.jsx:259-265), triggered by styled button. Only accepts `image/*` MIME types. No file size validation.
+File input is hidden in ImageUploader component, triggered by styled button. Only accepts `image/*` MIME types. No file size validation. Uses `loadImageFromFile()` Promise-based API for async loading.
 
 ## Styling
 
-Uses Tailwind CSS with custom animations defined inline:
-- `@keyframes shimmer`: Shimmer effect for processing button
-- `@keyframes fadeIn`: Fade-in for converted image display
+Uses Tailwind CSS exclusively with custom animations defined inline in respective components:
+- `@keyframes shimmer`: Shimmer effect for processing button (ImageUploader.jsx)
+- `@keyframes fadeIn`: Fade-in for converted image display (ImageDisplay.jsx)
 
-Gradient background: `from-purple-50 to-blue-50`
+Gradient background: `from-purple-50 to-blue-50` (App.jsx)
+
+No CSS modules or separate stylesheets - all styling via Tailwind utilities and inline styles.
 
 ## Dependencies
 
